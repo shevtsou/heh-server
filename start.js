@@ -93,7 +93,7 @@ app.post('/field', function (req, res) {
 function addRandomBlood(enemy) {
   for (let x2 = -1; x2 <= 1; x2++) {
     for (let y2 = -1; y2 <= 1; y2++) {
-      if (Math.random() > 0.7) {
+      if (Math.random() > 0.9) {
         ENTITIES.add(enemy.x + x2, enemy.y + y2, new Blood(enemy.x + x2, enemy.y + y2))
       }
     }
