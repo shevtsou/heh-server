@@ -2,7 +2,7 @@
 var express = require('express');
 var app = express();
 const map = require('./map')
-const { User, Entity, Grass } = require('./entities')
+const { User, Entity, Grass, RIP, Blood, Shot } = require('./entities')
 const { generateGrass } = require('./generators')
 const PASSWORD = "1234"
 
@@ -47,6 +47,12 @@ ENTITIES.move = (entity, fromX, fromY, toX, toY) => {
   ENTITIES.add(toX, toY, entity)
 }
 
+ENTITIES.remove = (entity) => {
+  const fromX = entity.x;
+  const fromY = entity.y
+  ENTITIES.set(fromX, fromY, ENTITIES.get(fromX, fromY).filter(e=>e !== entity))
+}
+
 ENTITIES.findUser = (userId) => USERS[id]
 
 generateGrass()
@@ -84,6 +90,30 @@ app.post('/field', function (req, res) {
     })
 });
 
+function addRandomBlood(enemy) {
+  for (let x2 = -1; x2 <= 1; x2++) {
+    for (let y2 = -1; y2 <= 1; y2++) {
+      if (Math.random() > 0.7) {
+        ENTITIES.add(enemy.x + x2, enemy.y + y2, new Blood(enemy.x + x2, enemy.y + y2))
+      }
+    }
+  }
+}
+
+function findUserAndKill(x, y) {
+  const enemy = ENTITIES.get(x, y).find(e=>e instanceof User)
+  if (!enemy) {
+    return false;
+  }
+  enemy.health -= 20;
+  if (enemy.health <= 0) {
+    ENTITIES.remove(enemy)
+    ENTITIES.add(enemy.x, enemy.y, new RIP(enemy.x, enemy.y))
+  }
+  addRandomBlood(enemy)
+  return true;
+}
+
 app.post('/do', function (req, res) {
   const { action, userId } = req.body;
   const user = USERS[userId]
@@ -107,6 +137,34 @@ app.post('/do', function (req, res) {
     case 's': 
     ENTITIES.move(user, user.x, user.y, user.x, user.y + 1)
       user.y++
+      break;
+    case 'i':
+      for (let diff = 1; diff < 30; diff++) {
+        if (findUserAndKill(user.x, user.y  - diff)) {
+          break;
+        }
+      }
+      break;
+    case 'j':
+      for (let diff = 1; diff < 30; diff++) {
+        if (findUserAndKill(user.x - diff, user.y)) {
+          break;
+        }
+      }
+      break;
+    case 'l':
+      for (let diff = 1; diff < 30; diff++) {
+        if (findUserAndKill(user.x + diff, user.y)) {
+          break;
+        }
+      }
+      break;
+    case 'k':
+      for (let diff = 1; diff < 30; diff++) {
+        if (findUserAndKill(user.x, user.y  + diff)) {
+          break;
+        }
+      }
       break;
     default:
       res.send('NO SUCH OP')
