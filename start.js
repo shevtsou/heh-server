@@ -3,7 +3,7 @@ var express = require('express');
 var app = express();
 const map = require('./map')
 const { User, Entity, Grass, RIP, Blood, Shot } = require('./entities')
-const { generateGrass } = require('./generators')
+const { generateGrass, generateFieldGrass } = require('./generators')
 const PASSWORD = "1234"
 
 global.ENTITIES = []
@@ -56,6 +56,7 @@ ENTITIES.remove = (entity) => {
 ENTITIES.findUser = (userId) => USERS[id]
 
 generateGrass()
+generateFieldGrass()
 
 app.use(express.json()) 
 app.post('/registerUser', (req, res) => {
